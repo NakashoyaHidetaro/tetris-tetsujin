@@ -140,6 +140,9 @@ export default function App() {
       // ハードドロップは不可逆のため、key repeat とロック境界をまたいだ入力が
       // 出現直後の次ミノへ誤適用されないよう pieceId 世代判定でガードする
       if (e.key === ' ') {
+        // ゲームオーバー中は preventDefault せずボタンのネイティブ Space
+        // activation (フォーカスした Restart の押下) に委ねる
+        if (stateRef.current.over) return
         e.preventDefault()
         if (e.repeat) return
         const pieceId = stateRef.current.pieceId

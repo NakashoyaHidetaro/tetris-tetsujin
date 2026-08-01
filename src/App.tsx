@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 const COLS = 10
 const ROWS = 20
@@ -123,7 +123,10 @@ export default function App() {
   const [state, setState] = useState<GameState>(newGame)
   const stateRef = useRef(state)
 
-  useEffect(() => {
+  // useLayoutEffect で commit と同一タスク内に ref を同期する: paint 後に届く
+  // keydown が常に最新の pieceId を見るため、描画済みの新ミノへの正当な
+  // ハードドロップが世代不一致で無視される窓が生じない
+  useLayoutEffect(() => {
     stateRef.current = state
   }, [state])
 

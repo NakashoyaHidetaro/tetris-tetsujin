@@ -35,6 +35,14 @@ npm run build
 npm run preview
 ```
 
+### テスト
+
+```bash
+npm test
+```
+
+vitest によるゲームロジック (`src/game/`) のユニットテスト。CI (GitHub Actions) でも build + test を実行する。
+
 ## 操作方法
 
 | キー | 動作 |

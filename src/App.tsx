@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const COLS = 10
 const ROWS = 20
@@ -18,6 +18,7 @@ interface Piece {
 interface GameState {
   board: Board
   piece: Piece
+  pieceId: number
   score: number
   over: boolean
 }
@@ -56,6 +57,7 @@ const rotateShape = (shape: Shape): Shape =>
 const newGame = (): GameState => ({
   board: emptyBoard(),
   piece: randomPiece(),
+  pieceId: 0,
   score: 0,
   over: false,
 })
@@ -78,6 +80,7 @@ const lockPiece = (state: GameState): GameState => {
   return {
     board: remaining,
     piece,
+    pieceId: state.pieceId + 1,
     score: state.score + cleared * 100 * cleared,
     over: collides(remaining, piece.shape, piece.x, piece.y),
   }
@@ -118,6 +121,11 @@ const hardDrop = (state: GameState): GameState => {
 
 export default function App() {
   const [state, setState] = useState<GameState>(newGame)
+  const stateRef = useRef(state)
+
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
 
   useEffect(() => {
     const timer = setInterval(() => setState(step), DROP_MS)
@@ -126,12 +134,20 @@ export default function App() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      // ハードドロップは不可逆のため、key repeat とロック境界をまたいだ入力が
+      // 出現直後の次ミノへ誤適用されないよう pieceId 世代判定でガードする
+      if (e.key === ' ') {
+        e.preventDefault()
+        if (e.repeat) return
+        const pieceId = stateRef.current.pieceId
+        setState((s) => (s.pieceId === pieceId ? hardDrop(s) : s))
+        return
+      }
       const actions: Record<string, (s: GameState) => GameState> = {
         ArrowLeft: (s) => move(s, -1),
         ArrowRight: (s) => move(s, 1),
         ArrowDown: step,
         ArrowUp: rotate,
-        ' ': hardDrop,
       }
       const action = actions[e.key]
       if (action) {

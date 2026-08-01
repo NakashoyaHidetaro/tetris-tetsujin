@@ -154,7 +154,6 @@ export default function App() {
 
   return (
     <div className="game">
-      <h1>Simple Tetris</h1>
       <p className="score">Score: {state.score}</p>
       <div className="board">
         {display.flatMap((row, y) =>

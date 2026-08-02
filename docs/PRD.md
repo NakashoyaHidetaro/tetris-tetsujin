@@ -3,9 +3,7 @@
 | | |
 |---|---|
 | Status | Draft |
-| Author | silenvx |
 | Last updated | 2026-08-02 |
-| 対象リポジトリ | https://github.com/silenvx/simple-tetris |
 
 ## Objective
 

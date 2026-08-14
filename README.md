@@ -43,6 +43,11 @@ npm test
 
 vitest によるゲームロジック (`src/game/`) のユニットテスト。CI (GitHub Actions) でも build + test を実行する。
 
+## ドキュメント
+
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — ファイル構成・責務分離・ゲームが動く仕組み
+- [docs/PRD.md](./docs/PRD.md) — 機能の拡張計画
+
 ## 操作方法
 
 | キー | 動作 |

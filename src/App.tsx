@@ -1,3 +1,5 @@
+import { useCallback, useMemo, useState } from 'react'
+import { AutoToggle } from './components/AutoToggle'
 import { Board } from './components/Board'
 import { GameOverOverlay } from './components/GameOverOverlay'
 import { HelpBar } from './components/HelpBar'
@@ -8,14 +10,22 @@ import { ThemeToggle } from './components/ThemeToggle'
 import { TouchControls } from './components/TouchControls'
 import { MuteToggle } from './components/sound/MuteToggle'
 import { SoundManager } from './components/sound/SoundManager'
+import { useAutoPlay } from './hooks/useAutoPlay'
 import { useTetris } from './hooks/useTetris'
 
 export default function App() {
+  // 自動プレイ (AI) の ON/OFF。手動操作が入ったら OFF に戻す
+  const [auto, setAuto] = useState(false)
+  // setState の setter は安定なので、この参照も変わらない (useTetris の
+  // keydown 効果を張り直さない)
+  const stopAuto = useCallback(() => setAuto(false), [])
+
   const {
     state,
     best,
     ranking,
     lastRank,
+    controls,
     restart,
     moveLeft,
     moveRight,
@@ -24,7 +34,41 @@ export default function App() {
     hardDrop,
     hold,
     togglePause,
-  } = useTetris()
+  } = useTetris({ onManualInput: stopAuto })
+
+  useAutoPlay(state, controls, auto)
+
+  // タッチ操作もキーボードと同じく「手動操作」なので自動を解除する。
+  // ポーズだけは自動を維持したいのでそのまま渡す
+  const touch = useMemo(
+    () => ({
+      moveLeft: () => {
+        stopAuto()
+        moveLeft()
+      },
+      moveRight: () => {
+        stopAuto()
+        moveRight()
+      },
+      rotate: () => {
+        stopAuto()
+        rotate()
+      },
+      softDrop: () => {
+        stopAuto()
+        softDrop()
+      },
+      hardDrop: () => {
+        stopAuto()
+        hardDrop()
+      },
+      hold: () => {
+        stopAuto()
+        hold()
+      },
+    }),
+    [stopAuto, moveLeft, moveRight, rotate, softDrop, hardDrop, hold],
+  )
 
   return (
     <div className="game">
@@ -40,6 +84,7 @@ export default function App() {
             lines={state.lines}
           />
           <ThemeToggle />
+          <AutoToggle enabled={auto} onChange={setAuto} />
           <MuteToggle />
         </div>
         <Board
@@ -57,12 +102,12 @@ export default function App() {
       <HelpBar />
       <SoundManager state={state} />
       <TouchControls
-        onMoveLeft={moveLeft}
-        onMoveRight={moveRight}
-        onRotate={rotate}
-        onSoftDrop={softDrop}
-        onHardDrop={hardDrop}
-        onHold={hold}
+        onMoveLeft={touch.moveLeft}
+        onMoveRight={touch.moveRight}
+        onRotate={touch.rotate}
+        onSoftDrop={touch.softDrop}
+        onHardDrop={touch.hardDrop}
+        onHold={touch.hold}
         onTogglePause={togglePause}
         paused={state.paused}
         disabled={state.over}

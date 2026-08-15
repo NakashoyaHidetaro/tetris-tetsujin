@@ -6,7 +6,15 @@ import { loadRanking, saveScore } from '../game/storage'
 import { newGame } from '../game/transitions'
 import type { GameAction, RotationDir } from '../game/types'
 
-export const useTetris = () => {
+export interface UseTetrisOptions {
+  /**
+   * 手動のプレイ操作 (移動・回転・ドロップ・ホールド) が入力されたときに呼ばれる。
+   * 自動プレイの解除に使う。ポーズは「プレイ操作」ではないので通知しない
+   */
+  onManualInput?: () => void
+}
+
+export const useTetris = ({ onManualInput }: UseTetrisOptions = {}) => {
   const [state, dispatch] = useReducer(gameReducer, undefined, newGame)
   const [ranking, setRanking] = useState<RankingEntry[]>(loadRanking)
   const [lastRank, setLastRank] = useState<number | null>(null)
@@ -14,6 +22,9 @@ export const useTetris = () => {
   // StrictMode の effect 二重実行や再レンダリングでも重複登録されない
   const savedRef = useRef(false)
   const stateRef = useRef(state)
+  // keydown ハンドラを張り直さずに最新のコールバックを見るための箱
+  const manualRef = useRef(onManualInput)
+  manualRef.current = onManualInput
 
   // useLayoutEffect で commit と同一タスク内に ref を同期する: paint 後に届く
   // keydown が常に最新の pieceId を見るため、描画済みの新ミノへの正当な
@@ -83,12 +94,15 @@ export const useTetris = () => {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      // 実際に操作が成立したときだけ通知する (未割り当てキーでは呼ばない)
+      const manual = () => manualRef.current?.()
       if (e.key === ' ') {
         // ゲームオーバー中は preventDefault せずボタンのネイティブ Space
         // activation (フォーカスした Restart の押下) に委ねる
         if (stateRef.current.over) return
         e.preventDefault()
         if (e.repeat) return
+        manual()
         hardDrop()
         return
       }
@@ -105,6 +119,7 @@ export const useTetris = () => {
         if (stateRef.current.over) return
         e.preventDefault()
         if (e.repeat) return
+        manual()
         hold()
         return
       }
@@ -121,6 +136,7 @@ export const useTetris = () => {
       const run = actions[e.key]
       if (run) {
         e.preventDefault()
+        manual()
         run()
       }
     }

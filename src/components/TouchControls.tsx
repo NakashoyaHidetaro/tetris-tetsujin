@@ -140,8 +140,28 @@ export function TouchControls({
   // ポーズ中はゲームプレイ入力を止める (再開操作だけ残す = PRD #4 の要件と揃える)
   const playDisabled = disabled || paused
 
+  // コントローラの実高を CSS 変数に反映する (PRD #16)。
+  // ボタンが折り返して 2 段になる幅では高さが CSS の想定値と一致しないため、
+  // 固定値ではなく実測で盤面側の余白 (.game の padding-bottom) を確保する
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const apply = () => {
+      // display: none (マウス環境) のときは 0 になり、余白も消える
+      document.documentElement.style.setProperty('--touch-controls-height', `${el.offsetHeight}px`)
+    }
+    apply()
+    const observer = new ResizeObserver(apply)
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      document.documentElement.style.removeProperty('--touch-controls-height')
+    }
+  }, [])
+
   return (
-    <div className="touch-controls" role="group" aria-label="タッチ操作">
+    <div ref={rootRef} className="touch-controls" role="group" aria-label="タッチ操作">
       <div className="touch-cluster touch-cluster-move">
         <RepeatButton
           label="◀"

@@ -1,0 +1,115 @@
+/*
+ * モバイル向けスライドインメニュー (PRD #16)。色は index.css の CSS 変数のみ参照する。
+ * 開閉ボタンは既定で非表示で、タッチ端末または狭幅のときだけ出す
+ * (PC では左パネルがそのまま見えているのでメニューは不要)。
+ */
+.menu-drawer-toggle {
+  display: none;
+}
+
+@media (pointer: coarse), (max-width: 700px) {
+  .menu-drawer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 2px solid var(--panel-border);
+    background: var(--panel-bg);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .menu-drawer-toggle:active {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.24);
+  }
+}
+
+.menu-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--overlay-bg);
+}
+
+.menu-drawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 41;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(320px, 86vw);
+  padding: calc(12px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px))
+    calc(12px + env(safe-area-inset-bottom, 0px)) 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--panel-bg);
+  border-left: 2px solid var(--panel-border);
+  animation: menu-drawer-in 180ms ease-out;
+}
+
+@keyframes menu-drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-drawer-panel {
+    animation: none;
+  }
+}
+
+.menu-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.menu-drawer-title {
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.menu-drawer-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb), 0.14);
+  color: var(--fg);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-drawer-close:active {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.34);
+}
+
+/* 中身 (HOLD / スコア / 各種トグル) は左パネルと同じ縦積み */
+.menu-drawer-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}

@@ -67,6 +67,24 @@
   content: attr(data-mino);
 }
 
+/*
+ * モバイル (PRD #16): 盤面の右に並ぶので幅を詰める。
+ * 固定 120px をやめて中身なりの幅 (4 セル + 余白 ≒ 62px) にし、
+ * 空いた幅は盤面 (--cell-size) に回す
+ */
+@media (max-width: 700px) {
+  .next-panel {
+    --next-cell: 10px;
+    width: auto;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .next-list {
+    gap: 6px;
+  }
+}
+
 /* ポーズ中の伏せ表示 */
 .next-hidden {
   color: var(--muted);

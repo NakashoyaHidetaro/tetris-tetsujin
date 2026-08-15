@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useId, useState } from 'react'
 import {
   PALETTES,
   THEMES,
@@ -17,6 +17,9 @@ import './theme-toggle.css'
  */
 export function ThemeToggle() {
   const [display, setDisplay] = useState<Display>(loadDisplay)
+  // PC 用の左パネルとモバイル用メニューの両方に描かれるので、id は重複しないよう生成する
+  const themeId = useId()
+  const paletteId = useId()
 
   const update = useCallback((patch: Partial<Display>) => {
     setDisplay((prev) => {
@@ -30,10 +33,10 @@ export function ThemeToggle() {
   return (
     <section className="display-settings" aria-label="表示設定">
       <div className="display-row">
-        <span className="display-label" id="theme-label">
+        <span className="display-label" id={themeId}>
           テーマ
         </span>
-        <div className="display-choices" role="group" aria-labelledby="theme-label">
+        <div className="display-choices" role="group" aria-labelledby={themeId}>
           {THEMES.map(({ value, label }) => (
             <button
               key={value}
@@ -49,10 +52,10 @@ export function ThemeToggle() {
       </div>
 
       <div className="display-row">
-        <span className="display-label" id="palette-label">
+        <span className="display-label" id={paletteId}>
           ミノ配色
         </span>
-        <div className="display-choices" role="group" aria-labelledby="palette-label">
+        <div className="display-choices" role="group" aria-labelledby={paletteId}>
           {PALETTES.map(({ value, label }) => (
             <button
               key={value}

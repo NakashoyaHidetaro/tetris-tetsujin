@@ -131,8 +131,11 @@ body {
 /*
  * レスポンシブ (PRD #16 モバイル対応)。
  * 900px 以下: 余白とギャップを詰めて横並びのまま維持する
- * 700px 以下: 盤面を最上段に置き、サイドパネルはその下で横方向に回り込ませる
- * 粗いポインタ: 画面下端に固定表示される TouchControls の高さぶん下余白を空ける
+ * 700px 以下: 上段は「盤面 (左) + NEXT (右)」の横並び。左パネルの中身は
+ *             MenuDrawer (☰) に収納するので .side-panel-left は隠す。
+ *             下段は従来どおり画面下端固定の TouchControls
+ * 粗いポインタ: 画面下端に固定表示される TouchControls の高さぶん下余白を空け、
+ *             キーボード前提の HelpBar は隠す
  */
 @media (max-width: 900px) {
   .game {
@@ -151,23 +154,27 @@ body {
 }
 
 @media (max-width: 700px) {
-  .game-main {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-
-  /* 盤面を先頭へ。パネル類は盤面の下に回り込ませる */
-  .game-main > .board-wrap {
-    order: -1;
-  }
-
-  .side-panel {
-    flex-direction: row;
-    flex-wrap: wrap;
+  /* 盤面は余白いっぱいまで拡大するので、残りスペースの中央に配置する
+     (900px 以下で flex-start にした上書きを戻す) */
+  .game {
     justify-content: center;
-    align-items: flex-start;
+  }
+
+  .game-main {
+    /* 盤面 (主役) + NEXT の 2 カラム。はみ出さないよう中央寄せで詰める */
+    justify-content: center;
     width: 100%;
+  }
+
+  /* 中身は MenuDrawer に入っているのでこちらは出さない */
+  .side-panel-left {
+    display: none;
+  }
+
+  /* NEXT 列は中身なりの幅にして、余った幅は盤面に回す */
+  .side-panel-right {
+    flex: 0 0 auto;
+    gap: 8px;
   }
 
   .help {
@@ -177,8 +184,18 @@ body {
 
 @media (pointer: coarse) {
   .game {
-    /* fixed 配置の .touch-controls に隠れないぶんの下余白 */
-    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    /*
+     * fixed 配置の .touch-controls に隠れないぶんの下余白。
+     * 高さは TouchControls が実測して --touch-controls-height に入れる
+     * (safe-area 込み。折り返しで 2 段になる幅でも実高に追随する)。
+     * フォールバックは 1 段ぶんの見積もり
+     */
+    padding-bottom: calc(var(--touch-controls-height, calc(78px + env(safe-area-inset-bottom, 0px))) + 8px);
+  }
+
+  /* キーボード前提の操作説明はタッチ端末では出さない */
+  .help {
+    display: none;
   }
 
   /* モバイルブラウザの URL バー伸縮に追随する高さ (対応環境のみ上書き) */

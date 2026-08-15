@@ -72,16 +72,67 @@
   }
 }
 
-@media (max-width: 600px) {
+/* 700px 超のタッチ端末 (タブレット等): サイドパネルが出ているので従来どおり 20px 上限 */
+@media (pointer: coarse) and (max-height: 780px) {
   .board-wrap {
-    --cell-size: min(20px, calc((100vw - 24px) / 10));
+    --cell-size: min(20px, calc((100vw - 110px) / 10), calc((100vh - 200px) / 20));
+  }
+
+  /* モバイルブラウザの URL バー伸縮に追随する高さ (対応環境のみ上書き) */
+  @supports (height: 100dvh) {
+    .board-wrap {
+      --cell-size: min(20px, calc((100vw - 110px) / 10), calc((100dvh - 200px) / 20));
+    }
   }
 }
 
-/* タッチ端末は画面下のコントローラ分 (約 200px) を差し引いた高さにも収める */
-@media (pointer: coarse) and (max-height: 780px) {
+/*
+ * 700px 以下は「盤面 + NEXT」の横並び。20px の上限は設けず、
+ * 幅: NEXT 列と余白のぶん (パネル約 62px + ギャップ 8px + ページ余白 16px + 盤面の枠 15px ≒ 110px)
+ * 高さ: ページ余白 + HelpBar のぶん (≒ 64px)
+ * を差し引いた残りいっぱいまで盤面を拡大する
+ */
+@media (max-width: 700px) {
   .board-wrap {
-    --cell-size: min(20px, calc((100vw - 24px) / 10), calc((100vh - 200px) / 20));
+    --cell-size: min(calc((100vw - 110px) / 10), calc((100vh - 64px) / 20));
+  }
+
+  @supports (height: 100dvh) {
+    .board-wrap {
+      --cell-size: min(calc((100vw - 110px) / 10), calc((100dvh - 64px) / 20));
+    }
+  }
+}
+
+/*
+ * 700px 以下のタッチ端末: 高さからは画面下端固定の TouchControls の実高
+ * (--touch-controls-height、safe-area 込みで TouchControls が実測) と
+ * ページ余白 + 盤面の枠 (≒ 32px) を差し引く
+ */
+@media (max-width: 700px) and (pointer: coarse) {
+  .board-wrap {
+    --cell-size: min(
+      calc((100vw - 110px) / 10),
+      calc(
+        (100vh - var(--touch-controls-height, calc(78px + env(safe-area-inset-bottom, 0px))) - 32px) /
+          20
+      )
+    );
+  }
+
+  @supports (height: 100dvh) {
+    .board-wrap {
+      --cell-size: min(
+        calc((100vw - 110px) / 10),
+        calc(
+          (
+              100dvh - var(--touch-controls-height, calc(78px + env(safe-area-inset-bottom, 0px))) -
+                32px
+            ) /
+            20
+        )
+      );
+    }
   }
 }
 

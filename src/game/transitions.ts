@@ -1,4 +1,4 @@
-import { collides, emptyBoard } from './board'
+import { collides, dropY, emptyBoard } from './board'
 import { COLS, ROWS } from './constants'
 import { randomPiece, rotateShape } from './piece'
 import { scoreForClear } from './scoring'
@@ -62,9 +62,6 @@ export const rotate = (state: GameState): GameState => {
 
 export const hardDrop = (state: GameState): GameState => {
   if (state.over) return state
-  let { y } = state.piece
-  while (!collides(state.board, state.piece.shape, state.piece.x, y + 1)) {
-    y++
-  }
+  const y = dropY(state.board, state.piece)
   return lockPiece({ ...state, piece: { ...state.piece, y } })
 }

@@ -18,3 +18,17 @@ body {
   gap: 12px;
   position: relative;
 }
+
+/* 盤面とサイドパネルの横並び。左パネルは盤面の上端に揃える */
+.game-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* 将来 HOLD (#6) / NEXT (#1) を積むためのパネル列 */
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

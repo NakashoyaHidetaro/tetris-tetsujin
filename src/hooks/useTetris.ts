@@ -1,11 +1,13 @@
-import { useEffect, useLayoutEffect, useReducer, useRef } from 'react'
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react'
 import { DROP_MS } from '../game/constants'
 import { gameReducer } from '../game/reducer'
+import { loadBest, saveBest } from '../game/storage'
 import { newGame } from '../game/transitions'
 import type { GameAction } from '../game/types'
 
 export const useTetris = () => {
   const [state, dispatch] = useReducer(gameReducer, undefined, newGame)
+  const [best, setBest] = useState(loadBest)
   const stateRef = useRef(state)
 
   // useLayoutEffect で commit と同一タスク内に ref を同期する: paint 後に届く
@@ -14,6 +16,15 @@ export const useTetris = () => {
   useLayoutEffect(() => {
     stateRef.current = state
   }, [state])
+
+  // ゲームオーバーへ遷移した時点でベスト更新を判定する。over 中は score が
+  // 変化しないため、StrictMode の effect 二重実行や再レンダリングで複数回走っても
+  // saveBest は同じ値の上書き (冪等) にしかならない
+  useEffect(() => {
+    if (!state.over || state.score <= best) return
+    saveBest(state.score)
+    setBest(state.score)
+  }, [state.over, state.score, best])
 
   useEffect(() => {
     const timer = setInterval(() => dispatch({ type: 'tick' }), DROP_MS)
@@ -47,5 +58,5 @@ export const useTetris = () => {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  return { state, restart: () => dispatch({ type: 'restart' }) }
+  return { state, best, restart: () => dispatch({ type: 'restart' }) }
 }

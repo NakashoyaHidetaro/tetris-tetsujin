@@ -1,0 +1,27 @@
+.score-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 120px;
+  padding: 10px 12px;
+  background: #1e293b;
+  border: 2px solid #475569;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-label {
+  color: #94a3b8;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}

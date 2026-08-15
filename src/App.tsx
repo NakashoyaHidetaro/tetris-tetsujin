@@ -5,14 +5,19 @@ import { ScorePanel } from './components/ScorePanel'
 import { useTetris } from './hooks/useTetris'
 
 export default function App() {
-  const { state, restart } = useTetris()
+  const { state, best, restart } = useTetris()
 
   return (
     <div className="game">
-      <ScorePanel score={state.score} />
-      <Board board={state.board} piece={state.piece} />
-      {state.over && <GameOverOverlay onRestart={restart} />}
+      {/* 左パネル + 盤面の横並び (PRD UX / Mockups の配置合意) */}
+      <div className="game-main">
+        <div className="side-panel side-panel-left">
+          <ScorePanel score={state.score} best={best} />
+        </div>
+        <Board board={state.board} piece={state.piece} over={state.over} />
+      </div>
       <HelpBar />
+      {state.over && <GameOverOverlay onRestart={restart} />}
     </div>
   )
 }

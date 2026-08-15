@@ -1,3 +1,9 @@
+.board-wrap {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(10, 24px);
@@ -10,4 +16,18 @@
 
 .cell {
   background: #0f172a;
+  box-sizing: border-box;
+}
+
+/* ゴーストピース: 着地位置を半透明の輪郭で示す */
+.cell.ghost {
+  background: transparent;
+  border: 2px solid #94a3b8;
+  opacity: 0.45;
+}
+
+/* ゲームオーバー時は盤面をグレーアウトする */
+.board-wrap.over .board {
+  filter: grayscale(0.85) brightness(0.55);
+  transition: filter 200ms ease-out;
 }

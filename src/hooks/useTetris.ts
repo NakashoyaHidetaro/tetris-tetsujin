@@ -1,13 +1,18 @@
 import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react'
 import { DROP_MS } from '../game/constants'
 import { gameReducer } from '../game/reducer'
-import { loadBest, saveBest } from '../game/storage'
+import type { RankingEntry } from '../game/storage'
+import { loadRanking, saveScore } from '../game/storage'
 import { newGame } from '../game/transitions'
 import type { GameAction } from '../game/types'
 
 export const useTetris = () => {
   const [state, dispatch] = useReducer(gameReducer, undefined, newGame)
-  const [best, setBest] = useState(loadBest)
+  const [ranking, setRanking] = useState<RankingEntry[]>(loadRanking)
+  const [lastRank, setLastRank] = useState<number | null>(null)
+  // 1 ゲームにつき saveScore を厳密に 1 回だけ呼ぶためのガード。
+  // StrictMode の effect 二重実行や再レンダリングでも重複登録されない
+  const savedRef = useRef(false)
   const stateRef = useRef(state)
 
   // useLayoutEffect で commit と同一タスク内に ref を同期する: paint 後に届く
@@ -17,14 +22,20 @@ export const useTetris = () => {
     stateRef.current = state
   }, [state])
 
-  // ゲームオーバーへ遷移した時点でベスト更新を判定する。over 中は score が
-  // 変化しないため、StrictMode の effect 二重実行や再レンダリングで複数回走っても
-  // saveBest は同じ値の上書き (冪等) にしかならない
+  // ゲームオーバーへ遷移した瞬間にスコアをランキングへ 1 回だけ登録する。
+  // saveScore は冪等ではない (同じスコアが何件も積まれる) ため、savedRef で
+  // 多重呼び出しを防ぎ、restart (over が false に戻る) でフラグを戻す
   useEffect(() => {
-    if (!state.over || state.score <= best) return
-    saveBest(state.score)
-    setBest(state.score)
-  }, [state.over, state.score, best])
+    if (!state.over) {
+      savedRef.current = false
+      return
+    }
+    if (savedRef.current) return
+    savedRef.current = true
+    const { ranking: next, rank } = saveScore(state.score)
+    setRanking(next)
+    setLastRank(rank)
+  }, [state.over, state.score])
 
   useEffect(() => {
     const timer = setInterval(() => dispatch({ type: 'tick' }), DROP_MS)
@@ -58,5 +69,12 @@ export const useTetris = () => {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  return { state, best, restart: () => dispatch({ type: 'restart' }) }
+  // best は ScorePanel の BEST 表示用 (ランキング 1 位 = 従来のベストスコア)
+  return {
+    state,
+    best: ranking[0]?.score ?? 0,
+    ranking,
+    lastRank,
+    restart: () => dispatch({ type: 'restart' }),
+  }
 }

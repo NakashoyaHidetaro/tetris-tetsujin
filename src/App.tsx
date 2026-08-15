@@ -5,7 +5,7 @@ import { ScorePanel } from './components/ScorePanel'
 import { useTetris } from './hooks/useTetris'
 
 export default function App() {
-  const { state, best, restart } = useTetris()
+  const { state, best, ranking, lastRank, restart } = useTetris()
 
   return (
     <div className="game">
@@ -17,7 +17,14 @@ export default function App() {
         <Board board={state.board} piece={state.piece} over={state.over} />
       </div>
       <HelpBar />
-      {state.over && <GameOverOverlay onRestart={restart} />}
+      {state.over && (
+        <GameOverOverlay
+          score={state.score}
+          ranking={ranking}
+          rank={lastRank}
+          onRestart={restart}
+        />
+      )}
     </div>
   )
 }

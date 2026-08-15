@@ -2,16 +2,234 @@
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  background: rgba(15, 23, 42, 0.85);
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.92);
+  animation: overlay-fade-in 240ms ease-out both;
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ランキング 10 行が入りきらない小さい盤面でもスクロールで破綻させない */
+.overlay-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+  max-height: 100%;
+  overflow-y: auto;
+  color: #e2e8f0;
+}
+
+.overlay-title {
+  margin: 0;
   font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  animation: title-drop-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+}
+
+@keyframes title-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.overlay-score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+}
+
+.overlay-score-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: #94a3b8;
+}
+
+.overlay-score-value {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #3b82f6;
+}
+
+/* NEW RECORD: 金色のグロー + 表面を走るシマー */
+.new-record {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 20px;
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #78350f, #b45309);
+  color: #fde68a;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  animation: record-glow 1.4s ease-in-out infinite alternate;
+}
+
+.new-record .bi {
+  color: #fbbf24;
+}
+
+.new-record::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  animation: record-shimmer 2.2s ease-in-out infinite;
+}
+
+@keyframes record-glow {
+  from {
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  }
+  to {
+    box-shadow: 0 0 22px rgba(251, 191, 36, 0.85);
+  }
+}
+
+@keyframes record-shimmer {
+  0%,
+  60% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranking-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto 20px;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(30, 41, 59, 0.8);
+  font-size: 0.95rem;
+  animation: row-slide-in 320ms ease-out both;
+}
+
+@keyframes row-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 今回のスコアの行: アクセント色の枠 + パルスするグロー */
+.ranking-row.is-current {
+  background: rgba(59, 130, 246, 0.22);
+  box-shadow: inset 0 0 0 1px #3b82f6;
+  animation:
+    row-slide-in 320ms ease-out both,
+    row-pulse 1.2s ease-in-out 320ms infinite alternate;
+}
+
+@keyframes row-pulse {
+  from {
+    box-shadow:
+      inset 0 0 0 1px #3b82f6,
+      0 0 4px rgba(59, 130, 246, 0.3);
+  }
+  to {
+    box-shadow:
+      inset 0 0 0 1px #60a5fa,
+      0 0 16px rgba(96, 165, 250, 0.75);
+  }
+}
+
+.ranking-rank {
+  display: flex;
+  justify-content: center;
+}
+
+.rank-number {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.rank-trophy {
+  font-size: 1rem;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.ranking-score {
+  font-variant-numeric: tabular-nums;
   font-weight: bold;
 }
 
+.ranking-date {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.ranking-current-mark {
+  color: #93c5fd;
+  animation: mark-twinkle 1s ease-in-out infinite alternate;
+}
+
+@keyframes mark-twinkle {
+  from {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.ranking-empty,
+.ranking-out {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
 .overlay button {
+  margin-top: 4px;
   font-size: 1rem;
   padding: 8px 24px;
   border: none;
@@ -19,4 +237,17 @@
   background: #3b82f6;
   color: white;
   cursor: pointer;
+}
+
+/* アニメーション抑制設定を尊重する */
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlay-title,
+  .new-record,
+  .new-record::after,
+  .ranking-row,
+  .ranking-row.is-current,
+  .ranking-current-mark {
+    animation: none;
+  }
 }

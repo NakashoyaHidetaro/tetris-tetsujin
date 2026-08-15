@@ -37,10 +37,14 @@ export const useTetris = () => {
     setLastRank(rank)
   }, [state.over, state.score])
 
+  // ポーズ中はタイマー自体を止める。reducer も tick を無視するので二重の
+  // 防御だが、将来レベルごとに間隔を変える (#3) 際に依存配列を足すだけで
+  // 済む形にしておく
   useEffect(() => {
+    if (state.paused) return
     const timer = setInterval(() => dispatch({ type: 'tick' }), DROP_MS)
     return () => clearInterval(timer)
-  }, [])
+  }, [state.paused])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -51,6 +55,14 @@ export const useTetris = () => {
         e.preventDefault()
         if (e.repeat) return
         dispatch({ type: 'hardDrop', pieceId: stateRef.current.pieceId })
+        return
+      }
+      if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+        // ゲームオーバー中はポーズできない (reducer 側でも無視される)
+        if (stateRef.current.over) return
+        e.preventDefault()
+        if (e.repeat) return
+        dispatch({ type: 'togglePause' })
         return
       }
       const actions: Record<string, GameAction> = {

@@ -1,0 +1,54 @@
+/* 盤面を隠さないポーズ表示: 面はほぼ透過で、ラベル部分だけ視認性を確保する */
+.pause-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.18);
+  pointer-events: none;
+  /* .board-wrap が line-height: 0 なのでここで戻す */
+  line-height: normal;
+}
+
+.pause-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 22px;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.82);
+  animation: pause-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.pause-title {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 1.6rem;
+  font-weight: bold;
+  letter-spacing: 0.18em;
+}
+
+.pause-hint {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+@keyframes pause-pulse {
+  from {
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.35);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pause-panel {
+    animation: none;
+  }
+}

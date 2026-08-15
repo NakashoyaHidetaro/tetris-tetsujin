@@ -1,0 +1,60 @@
+/* 見た目は score-panel.css を踏襲 (幅 120px / 同じ背景・枠) して左右で統一する */
+.next-panel {
+  --next-cell: 14px;
+  --next-gap: 1px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 120px;
+  padding: 10px 12px;
+  background: #1e293b;
+  border: 2px solid #475569;
+}
+
+/* 見出しは ScorePanel の .stat-label と同じ体裁 (別ファイルへの依存は持たない) */
+.next-label {
+  color: #94a3b8;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.next-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 行ごとの高さを揃える: 2 行ぶん (I の 1 行でも O の 2 行でも同じ高さ) */
+.next-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--next-cell) * 2 + var(--next-gap));
+}
+
+.next-preview {
+  display: grid;
+  grid-auto-rows: var(--next-cell);
+  gap: var(--next-gap);
+}
+
+.next-cell {
+  width: var(--next-cell);
+  height: var(--next-cell);
+  background: transparent;
+}
+
+.next-cell.filled {
+  border-radius: 2px;
+}
+
+/* ポーズ中の伏せ表示 */
+.next-hidden {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+}

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { emptyBoard } from './board'
-import { hardDrop, lockPiece, newGame, step } from './transitions'
+import { tetrominoOf } from './tetrominoes'
+import { hardDrop, lockPiece, move, newGame, rotate, step, togglePause } from './transitions'
 import type { GameState } from './types'
 
 const square = [
@@ -36,7 +37,6 @@ describe('lockPiece', () => {
   })
 
   it('次のミノがスポーン位置で衝突すると over になる', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0)
     const board = emptyBoard()
     for (let x = 0; x < 9; x++) {
       board[0][x] = '#fff'
@@ -44,8 +44,48 @@ describe('lockPiece', () => {
     const state = stateWith({
       board,
       piece: { shape: [[1]], color: '#abc', x: 9, y: 19 },
+      // 次ミノを I に固定する (x=3..6, y=0 で board[0] の埋まったセルと衝突する)
+      queue: ['I', 'O', 'T'],
+      bag: ['S', 'Z', 'J', 'L'],
     })
     expect(lockPiece(state).over).toBe(true)
+  })
+
+  it('次ミノを queue の先頭から取り出し、queue を bag で補充する', () => {
+    const state = stateWith({
+      board: emptyBoard(),
+      piece: { shape: square, color: '#abc', x: 0, y: 18 },
+      queue: ['O', 'T', 'S'],
+      bag: ['Z', 'J'],
+    })
+    const next = lockPiece(state)
+    expect(next.piece.color).toBe(tetrominoOf('O').color)
+    expect(next.queue).toEqual(['T', 'S', 'Z'])
+    expect(next.bag).toEqual(['J'])
+  })
+})
+
+describe('togglePause', () => {
+  it('paused をトグルする', () => {
+    const state = newGame()
+    const paused = togglePause(state)
+    expect(paused.paused).toBe(true)
+    expect(togglePause(paused).paused).toBe(false)
+  })
+
+  it('over 中は同一の state 参照を返す', () => {
+    const state = stateWith({ over: true })
+    expect(togglePause(state)).toBe(state)
+  })
+})
+
+describe('paused 中の遷移', () => {
+  it('step / move / rotate / hardDrop が同一の state 参照を返す', () => {
+    const state = stateWith({ paused: true })
+    expect(step(state)).toBe(state)
+    expect(move(state, 1)).toBe(state)
+    expect(rotate(state)).toBe(state)
+    expect(hardDrop(state)).toBe(state)
   })
 })
 

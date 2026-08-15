@@ -2,12 +2,8 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 
-/**
- * GitHub Pages はプロジェクトサイトのためサブパス (`/tetris-tetsujin/`) 配信になる。
- * 一方 S3 配信 (既存の deploy.yml) はルート配信なので、Pages 向けビルドのときだけ
- * 環境変数 GITHUB_PAGES=true で base を切り替える。
- */
-const base = process.env.GITHUB_PAGES === 'true' ? '/tetris-tetsujin/' : '/'
+// GitHub Pages のプロジェクトサイト配信のため、base はサブパス固定
+const base = '/tetris-tetsujin/'
 
 /**
  * PWA の Service Worker をビルド時に生成する自前プラグイン。

@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')!).render(
 )
 
 // PWA: Service Worker はビルド時にだけ生成されるので本番ビルドでのみ登録する。
-// base は S3 配信 ('/') と GitHub Pages ('/tetris-tetsujin/') で変わるため BASE_URL から組み立てる
+// base は '/tetris-tetsujin/' のため、登録パスは BASE_URL から組み立てる
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     const base = import.meta.env.BASE_URL

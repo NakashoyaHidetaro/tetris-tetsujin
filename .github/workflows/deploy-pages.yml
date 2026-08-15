@@ -10,7 +10,6 @@ permissions:
   pages: write
   id-token: write
 
-# 既存の deploy.yml (S3) の concurrency group 'deploy' とは別名にして衝突を避ける
 concurrency:
   group: deploy-pages
   cancel-in-progress: true
@@ -19,21 +18,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - run: npm ci
 
       - run: npm test
 
-      - name: Build (GitHub Pages base)
-        run: npm run build
-        env:
-          GITHUB_PAGES: 'true'
+      - run: npm run build
 
       - uses: actions/configure-pages@v5
 

@@ -52,10 +52,9 @@ vitest によるユニットテスト。CI (GitHub Actions) でも build + test 
 
 ## デプロイ
 
-master への push で 2 系統のデプロイが並行して走る。
-
-- `.github/workflows/deploy.yml` — AWS S3 (ルート配信、`base` は `/`)
-- `.github/workflows/deploy-pages.yml` — GitHub Pages (サブパス配信、`GITHUB_PAGES=true` で `base` が `/tetris-tetsujin/` に切り替わる)
+master への push で `.github/workflows/deploy-pages.yml` が走り、GitHub Pages
+(公式 Actions 方式: `configure-pages` → `upload-pages-artifact` → `deploy-pages`) にデプロイされる。
+プロジェクトサイト配信なので `base` は `/tetris-tetsujin/` 固定。
 
 > **初回のみ手動設定が必要**: GitHub の **Settings → Pages → Build and deployment → Source** を
 > **GitHub Actions** に変更しないと Pages のデプロイジョブが失敗する。
@@ -65,7 +64,7 @@ master への push で 2 系統のデプロイが並行して走る。
 Web App Manifest (`public/manifest.webmanifest`) + Service Worker でインストール・オフラインプレイに対応している。
 Service Worker は `vite.config.ts` の自前 Vite プラグインがビルド時に `dist/sw.js` を生成する
 (ランタイム依存を増やさないため外部プラグインは使っていない)。プリキャッシュ対象はビルド成果物から
-自動で組み立てられ、`base` の違い (`/` と `/tetris-tetsujin/`) も自動で吸収される。
+自動で組み立てられ、プリキャッシュ URL には `base` (`/tetris-tetsujin/`) が前置される。
 
 Service Worker は本番ビルドでのみ登録されるため、動作確認は `npm run build && npm run preview` で行う。
 

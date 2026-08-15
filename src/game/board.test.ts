@@ -8,10 +8,12 @@ const square = [
 ]
 
 const squarePiece = (x: number, y: number): Piece => ({
+  type: 'O',
   shape: square,
   color: '#0ff',
   x,
   y,
+  rotation: 0,
 })
 
 describe('collides', () => {

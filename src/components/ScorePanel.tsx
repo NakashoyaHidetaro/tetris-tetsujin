@@ -1,8 +1,7 @@
 import './score-panel.css'
 
 /**
- * 左パネルのスコア系スタッツ。将来 LEVEL / LINES (#1/#3/#6) を足せるよう、
- * 「ラベル + 値」の行を並べる構造にしている
+ * 左パネルのスコア系スタッツ。「ラベル + 値」の行を並べる構造にしている
  */
 function StatRow({ label, value }: { label: string; value: number }) {
   return (
@@ -13,11 +12,23 @@ function StatRow({ label, value }: { label: string; value: number }) {
   )
 }
 
-export function ScorePanel({ score, best }: { score: number; best: number }) {
+export function ScorePanel({
+  score,
+  best,
+  level,
+  lines,
+}: {
+  score: number
+  best: number
+  level: number
+  lines: number
+}) {
   return (
     <section className="score-panel" aria-label="スコア">
       <StatRow label="SCORE" value={score} />
       <StatRow label="BEST" value={best} />
+      <StatRow label="LEVEL" value={level} />
+      <StatRow label="LINES" value={lines} />
     </section>
   )
 }

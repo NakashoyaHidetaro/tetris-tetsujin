@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
-  background: rgba(15, 23, 42, 0.92);
+  background: var(--overlay-bg);
   animation: overlay-fade-in 240ms ease-out both;
 }
 
@@ -28,7 +28,7 @@
   max-width: 340px;
   max-height: 100%;
   overflow-y: auto;
-  color: #e2e8f0;
+  color: var(--fg);
 }
 
 .overlay-title {
@@ -60,13 +60,13 @@
 .overlay-score-label {
   font-size: 0.75rem;
   letter-spacing: 0.2em;
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 .overlay-score-value {
   font-size: 1.75rem;
   font-weight: bold;
-  color: #3b82f6;
+  color: var(--accent);
 }
 
 /* NEW RECORD: 金色のグロー + 表面を走るシマー */
@@ -78,10 +78,10 @@
   gap: 8px;
   margin: 0;
   padding: 6px 20px;
-  border: 1px solid rgba(251, 191, 36, 0.6);
+  border: 1px solid var(--record-border);
   border-radius: 999px;
-  background: linear-gradient(135deg, #78350f, #b45309);
-  color: #fde68a;
+  background: var(--record-bg);
+  color: var(--record-fg);
   font-size: 1.1rem;
   font-weight: bold;
   letter-spacing: 0.1em;
@@ -89,7 +89,7 @@
 }
 
 .new-record .bi {
-  color: #fbbf24;
+  color: var(--record-icon);
 }
 
 .new-record::after {
@@ -99,7 +99,7 @@
   background: linear-gradient(
     100deg,
     transparent 40%,
-    rgba(255, 255, 255, 0.45) 50%,
+    var(--shimmer) 50%,
     transparent 60%
   );
   transform: translateX(-100%);
@@ -108,10 +108,10 @@
 
 @keyframes record-glow {
   from {
-    box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+    box-shadow: 0 0 8px rgba(var(--record-glow-rgb), 0.4);
   }
   to {
-    box-shadow: 0 0 22px rgba(251, 191, 36, 0.85);
+    box-shadow: 0 0 22px rgba(var(--record-glow-rgb), 0.85);
   }
 }
 
@@ -142,7 +142,7 @@
   gap: 8px;
   padding: 4px 10px;
   border-radius: 4px;
-  background: rgba(30, 41, 59, 0.8);
+  background: var(--overlay-row-bg);
   font-size: 0.95rem;
   animation: row-slide-in 320ms ease-out both;
 }
@@ -160,8 +160,8 @@
 
 /* 今回のスコアの行: アクセント色の枠 + パルスするグロー */
 .ranking-row.is-current {
-  background: rgba(59, 130, 246, 0.22);
-  box-shadow: inset 0 0 0 1px #3b82f6;
+  background: rgba(var(--accent-rgb), 0.22);
+  box-shadow: inset 0 0 0 1px var(--accent);
   animation:
     row-slide-in 320ms ease-out both,
     row-pulse 1.2s ease-in-out 320ms infinite alternate;
@@ -170,13 +170,13 @@
 @keyframes row-pulse {
   from {
     box-shadow:
-      inset 0 0 0 1px #3b82f6,
-      0 0 4px rgba(59, 130, 246, 0.3);
+      inset 0 0 0 1px var(--accent),
+      0 0 4px rgba(var(--accent-rgb), 0.3);
   }
   to {
     box-shadow:
-      inset 0 0 0 1px #60a5fa,
-      0 0 16px rgba(96, 165, 250, 0.75);
+      inset 0 0 0 1px var(--accent-soft),
+      0 0 16px rgba(var(--accent-soft-rgb), 0.75);
   }
 }
 
@@ -186,7 +186,7 @@
 }
 
 .rank-number {
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 0.85rem;
 }
 
@@ -201,12 +201,12 @@
 }
 
 .ranking-date {
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 0.75rem;
 }
 
 .ranking-current-mark {
-  color: #93c5fd;
+  color: var(--accent-faint);
   animation: mark-twinkle 1s ease-in-out infinite alternate;
 }
 
@@ -224,7 +224,7 @@
 .ranking-empty,
 .ranking-out {
   margin: 0;
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 0.85rem;
 }
 
@@ -234,8 +234,8 @@
   padding: 8px 24px;
   border: none;
   border-radius: 4px;
-  background: #3b82f6;
-  color: white;
+  background: var(--accent);
+  color: var(--on-accent);
   cursor: pointer;
 }
 

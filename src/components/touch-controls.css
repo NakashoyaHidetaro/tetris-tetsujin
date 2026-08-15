@@ -1,0 +1,106 @@
+/*
+ * タッチ操作コントローラ (PRD #16)。色は index.css の CSS 変数のみを参照する。
+ * 既定は非表示で、粗いポインタ (指) のデバイスでだけ表示する = PC のキーボード操作の邪魔をしない
+ */
+.touch-controls {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .touch-controls {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--panel-bg);
+    border-top: 2px solid var(--panel-border);
+    /* ブラウザ側のスクロール/ズーム/選択・タップ時のハイライトを止める */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.touch-cluster {
+  display: flex;
+  gap: 10px;
+}
+
+.touch-cluster-action {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.touch-btn {
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb), 0.14);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-btn:active {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.34);
+}
+
+.touch-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.touch-btn-hold,
+.touch-btn-pause {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.touch-btn-hard {
+  background: rgba(var(--accent-soft-rgb), 0.28);
+}
+
+/* 画面が低い端末ではボタンを詰めて盤面の取り分を残す */
+@media (pointer: coarse) and (max-height: 640px) {
+  .touch-btn {
+    min-width: 48px;
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .touch-controls {
+    gap: 8px;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .touch-cluster {
+    gap: 6px;
+  }
+}
+
+/* 幅の狭い端末では最低幅を落として 1 段に収める */
+@media (pointer: coarse) and (max-width: 380px) {
+  .touch-btn {
+    min-width: 44px;
+    padding: 0 6px;
+  }
+}

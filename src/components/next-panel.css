@@ -7,13 +7,13 @@
   gap: 10px;
   width: 120px;
   padding: 10px 12px;
-  background: #1e293b;
-  border: 2px solid #475569;
+  background: var(--panel-bg);
+  border: 2px solid var(--panel-border);
 }
 
 /* 見出しは ScorePanel の .stat-label と同じ体裁 (別ファイルへの依存は持たない) */
 .next-label {
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 0.7rem;
   letter-spacing: 0.08em;
 }
@@ -51,9 +51,25 @@
   border-radius: 2px;
 }
 
+/* ミノ記号表示 (PRD #17)。盤面 (.cell) と同じ体裁でプレビューにも出す */
+:root[data-mino-symbols='on'] .next-cell.filled[data-mino] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: 9px;
+  font-weight: bold;
+  color: var(--mino-symbol);
+  text-shadow: 0 0 2px var(--mino-symbol-shadow);
+}
+
+:root[data-mino-symbols='on'] .next-cell.filled[data-mino]::after {
+  content: attr(data-mino);
+}
+
 /* ポーズ中の伏せ表示 */
 .next-hidden {
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 1.1rem;
   font-weight: bold;
   letter-spacing: 0.1em;

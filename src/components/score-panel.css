@@ -4,8 +4,8 @@
   gap: 10px;
   width: 120px;
   padding: 10px 12px;
-  background: #1e293b;
-  border: 2px solid #475569;
+  background: var(--panel-bg);
+  border: 2px solid var(--panel-border);
 }
 
 .stat {
@@ -15,7 +15,7 @@
 }
 
 .stat-label {
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 0.7rem;
   letter-spacing: 0.08em;
 }

@@ -1,0 +1,38 @@
+/* 見た目は next-panel.css / score-panel.css を踏襲して左右のパネルで統一する */
+.hold-panel {
+  --next-cell: 14px;
+  --next-gap: 1px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 120px;
+  padding: 10px 12px;
+  background: var(--panel-bg);
+  border: 2px solid var(--panel-border);
+}
+
+.hold-label {
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+/* NEXT の 1 スロットと同じ高さ (2 セルぶん) にして左右の見た目を揃える */
+.hold-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--next-cell) * 2 + var(--next-gap));
+}
+
+/* ホールド使用済み (次のロックまで交換できない) を薄さで示す */
+.hold-slot.used {
+  opacity: 0.35;
+}
+
+.hold-empty {
+  color: var(--muted);
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+}

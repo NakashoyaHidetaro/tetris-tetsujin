@@ -1,10 +1,10 @@
-import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react'
-import { DROP_MS } from '../game/constants'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { LOCK_DELAY_MS, dropInterval } from '../game/constants'
 import { gameReducer } from '../game/reducer'
 import type { RankingEntry } from '../game/storage'
 import { loadRanking, saveScore } from '../game/storage'
 import { newGame } from '../game/transitions'
-import type { GameAction } from '../game/types'
+import type { GameAction, RotationDir } from '../game/types'
 
 export const useTetris = () => {
   const [state, dispatch] = useReducer(gameReducer, undefined, newGame)
@@ -37,14 +37,49 @@ export const useTetris = () => {
     setLastRank(rank)
   }, [state.over, state.score])
 
-  // ポーズ中はタイマー自体を止める。reducer も tick を無視するので二重の
-  // 防御だが、将来レベルごとに間隔を変える (#3) 際に依存配列を足すだけで
-  // 済む形にしておく
+  // ポーズ中はタイマー自体を止める。reducer も tick を無視するので二重の防御。
+  // level を依存に含めることで、レベルが変わった瞬間に interval を張り直し、
+  // 新しい落下間隔が即時に反映される (PRD #3)
   useEffect(() => {
-    if (state.paused) return
-    const timer = setInterval(() => dispatch({ type: 'tick' }), DROP_MS)
+    if (state.paused || state.over) return
+    const timer = setInterval(() => dispatch({ type: 'tick' }), dropInterval(state.level))
     return () => clearInterval(timer)
-  }, [state.paused])
+  }, [state.paused, state.over, state.level])
+
+  // ロックディレイ (PRD #12)。接地している間だけタイマーを張り、満了で固定する。
+  // 「いつ張り直すか」はゲームロジック層が lockKey で指示する (接地・接地中の
+  // 移動/回転で +1。再始動上限に達すると据え置かれるので無限ロックにならない)。
+  // ポーズ中はゲームタイマー全般を止める要件 (PRD #4) に従い張らない
+  useEffect(() => {
+    if (!state.grounded || state.paused || state.over) return
+    const pieceId = state.pieceId
+    const timer = setTimeout(() => dispatch({ type: 'lock', pieceId }), LOCK_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [state.grounded, state.lockKey, state.pieceId, state.paused, state.over])
+
+  // キーハンドラとタッチ操作 (PRD #16) で同じ dispatch を共有するための操作関数群。
+  // dispatch は安定なので、これらの参照も再レンダリングをまたいで変わらない
+  const send = useCallback((action: GameAction) => dispatch(action), [])
+  const moveLeft = useCallback(() => send({ type: 'move', dx: -1 }), [send])
+  const moveRight = useCallback(() => send({ type: 'move', dx: 1 }), [send])
+  const rotate = useCallback(
+    (dir: RotationDir = 'cw') => send({ type: 'rotate', dir }),
+    [send],
+  )
+  const softDrop = useCallback(() => send({ type: 'softDrop' }), [send])
+  // ハードドロップだけは不可逆なので、押下時点の世代 (pieceId) を添えて送る
+  const hardDrop = useCallback(
+    () => send({ type: 'hardDrop', pieceId: stateRef.current.pieceId }),
+    [send],
+  )
+  const hold = useCallback(() => send({ type: 'hold' }), [send])
+  const togglePause = useCallback(() => send({ type: 'togglePause' }), [send])
+  const restart = useCallback(() => send({ type: 'restart' }), [send])
+
+  const controls = useMemo(
+    () => ({ moveLeft, moveRight, rotate, softDrop, hardDrop, hold, togglePause, restart }),
+    [moveLeft, moveRight, rotate, softDrop, hardDrop, hold, togglePause, restart],
+  )
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -54,7 +89,7 @@ export const useTetris = () => {
         if (stateRef.current.over) return
         e.preventDefault()
         if (e.repeat) return
-        dispatch({ type: 'hardDrop', pieceId: stateRef.current.pieceId })
+        hardDrop()
         return
       }
       if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
@@ -62,24 +97,36 @@ export const useTetris = () => {
         if (stateRef.current.over) return
         e.preventDefault()
         if (e.repeat) return
-        dispatch({ type: 'togglePause' })
+        togglePause()
         return
       }
-      const actions: Record<string, GameAction> = {
-        ArrowLeft: { type: 'move', dx: -1 },
-        ArrowRight: { type: 'move', dx: 1 },
-        ArrowDown: { type: 'softDrop' },
-        ArrowUp: { type: 'rotate' },
-      }
-      const action = actions[e.key]
-      if (action) {
+      // ホールドは 1 ミノ 1 回なのでキーリピートは無視する (PRD #6)
+      if (e.key === 'c' || e.key === 'C' || e.key === 'Shift') {
+        if (stateRef.current.over) return
         e.preventDefault()
-        dispatch(action)
+        if (e.repeat) return
+        hold()
+        return
+      }
+      const actions: Record<string, () => void> = {
+        ArrowLeft: moveLeft,
+        ArrowRight: moveRight,
+        ArrowDown: softDrop,
+        ArrowUp: () => rotate('cw'),
+        x: () => rotate('cw'),
+        X: () => rotate('cw'),
+        z: () => rotate('ccw'),
+        Z: () => rotate('ccw'),
+      }
+      const run = actions[e.key]
+      if (run) {
+        e.preventDefault()
+        run()
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [moveLeft, moveRight, rotate, softDrop, hardDrop, hold, togglePause])
 
   // best は ScorePanel の BEST 表示用 (ランキング 1 位 = 従来のベストスコア)
   return {
@@ -87,6 +134,14 @@ export const useTetris = () => {
     best: ranking[0]?.score ?? 0,
     ranking,
     lastRank,
-    restart: () => dispatch({ type: 'restart' }),
+    controls,
+    moveLeft,
+    moveRight,
+    rotate,
+    softDrop,
+    hardDrop,
+    hold,
+    togglePause,
+    restart,
   }
 }

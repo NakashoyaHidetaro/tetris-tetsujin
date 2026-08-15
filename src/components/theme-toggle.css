@@ -1,0 +1,62 @@
+/* 見た目は score-panel / next-panel を踏襲 (同じ背景・枠) して統一する */
+.display-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 120px;
+  padding: 10px 12px;
+  background: var(--panel-bg);
+  border: 2px solid var(--panel-border);
+}
+
+.display-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.display-label {
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.display-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.display-choice {
+  padding: 4px 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.display-choice:hover {
+  border-color: var(--accent-soft);
+}
+
+.display-choice.is-active {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.22);
+}
+
+.display-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.display-check input {
+  accent-color: var(--accent);
+  cursor: pointer;
+}

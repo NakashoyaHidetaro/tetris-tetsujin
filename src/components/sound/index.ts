@@ -1,0 +1,6 @@
+export { SoundManager } from './SoundManager'
+export { MuteToggle } from './MuteToggle'
+export { detectSoundEvents, toSoundSnapshot } from './events'
+export type { SoundEvent, SoundSnapshot } from './events'
+export { isMuted, setMuted, toggleMuted, subscribeMuted } from './settings'
+export { soundEngine, isAudioSupported } from './synth'

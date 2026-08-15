@@ -1,29 +1,182 @@
+/*
+ * セルの一辺は --cell-size に集約する (PRD #16 レスポンシブ対応)。
+ * 画面幅・画面高に応じてこの 1 変数だけをメディアクエリで差し替えれば盤面全体が縮む
+ */
 .board-wrap {
+  --cell-size: 24px;
   position: relative;
   display: inline-block;
   line-height: 0;
 }
 
+/*
+ * 盤面ジェスチャ操作 (PRD #16) を受けるときだけ付くクラス。
+ * ブラウザ既定のスクロール / ダブルタップズーム / 長押し選択メニューが
+ * スワイプ・タップ判定を奪わないように抑止する
+ */
+.board-wrap.gesture-area {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .board {
   display: grid;
-  grid-template-columns: repeat(10, 24px);
-  grid-auto-rows: 24px;
+  grid-template-columns: repeat(10, var(--cell-size));
+  grid-auto-rows: var(--cell-size);
   gap: 1px;
-  background: #1e293b;
-  border: 2px solid #475569;
+  background: var(--board-bg);
+  border: 2px solid var(--board-border);
   padding: 1px;
 }
 
 .cell {
-  background: #0f172a;
+  background: var(--cell-bg);
   box-sizing: border-box;
 }
 
 /* ゴーストピース: 着地位置を半透明の輪郭で示す */
 .cell.ghost {
   background: transparent;
-  border: 2px solid #94a3b8;
+  border: 2px solid var(--ghost-border);
   opacity: 0.45;
+}
+
+/*
+ * ミノ記号表示 (PRD #17): 色に頼らずミノ種別を区別できるよう、
+ * data-mino の頭文字をセル中央に重ねる。設定 ON のときだけ出す
+ */
+:root[data-mino-symbols='on'] .cell[data-mino]:not(.ghost) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: calc(var(--cell-size) * 0.55);
+  font-weight: bold;
+  color: var(--mino-symbol);
+  text-shadow: 0 0 2px var(--mino-symbol-shadow);
+}
+
+:root[data-mino-symbols='on'] .cell[data-mino]:not(.ghost)::after {
+  content: attr(data-mino);
+}
+
+/*
+ * レスポンシブ (PRD #16)。盤面の実寸は 10*cell + 9*gap + padding/border ≒ 10*cell + 15px、
+ * 高さは 20*cell + 15px。狭い画面では横幅から逆算した上限も併せて掛ける
+ */
+@media (max-width: 900px) {
+  .board-wrap {
+    --cell-size: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .board-wrap {
+    --cell-size: min(20px, calc((100vw - 24px) / 10));
+  }
+}
+
+/* タッチ端末は画面下のコントローラ分 (約 200px) を差し引いた高さにも収める */
+@media (pointer: coarse) and (max-height: 780px) {
+  .board-wrap {
+    --cell-size: min(20px, calc((100vw - 24px) / 10), calc((100vh - 200px) / 20));
+  }
+}
+
+/*
+ * ライン消去・ハードドロップの演出 (PRD #7)。
+ * ゲーム状態は消去と同時に更新済みで、ここは表示レイヤーに重ねるだけなので
+ * 進行も入力もブロックしない。色はすべて index.css の CSS 変数を参照する
+ */
+
+/* 盤面グリッドと同じ行ピッチのオーバーレイ。枠 (2px) + パディング (1px) ぶん内側に置く */
+.clear-flash,
+.drop-impact {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  pointer-events: none;
+}
+
+.clear-flash {
+  display: grid;
+  grid-template-rows: repeat(20, var(--cell-size));
+  gap: 1px;
+}
+
+/* 消去された行を一瞬だけ光らせて消える */
+.clear-flash-row {
+  grid-column: 1;
+  /* 既存のテーマ変数を流用する (index.css の色定義に新しい値を足さない) */
+  background: var(--shimmer);
+  animation: clear-flash 380ms ease-out forwards;
+}
+
+@keyframes clear-flash {
+  0% {
+    opacity: 0.9;
+    transform: scaleY(1);
+  }
+  45% {
+    opacity: 0.75;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(0.2);
+  }
+}
+
+/* ハードドロップの着地: 盤面全体を一瞬だけ沈ませる (縁の発光つき) */
+.drop-impact {
+  box-shadow: inset 0 0 0 2px var(--accent-soft);
+  animation: drop-impact 220ms ease-out forwards;
+}
+
+@keyframes drop-impact {
+  0% {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(1px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+}
+
+/* 動きを減らす設定では点滅・移動をやめる (演出は一瞬のフェードのみ) */
+@media (prefers-reduced-motion: reduce) {
+  .clear-flash-row,
+  .drop-impact {
+    animation-duration: 120ms;
+    animation-timing-function: linear;
+    transform: none;
+  }
+
+  .clear-flash-row {
+    animation-name: reduced-fade;
+  }
+
+  .drop-impact {
+    animation-name: reduced-fade;
+  }
+
+  @keyframes reduced-fade {
+    from {
+      opacity: 0.6;
+    }
+    to {
+      opacity: 0;
+    }
+  }
 }
 
 /* ゲームオーバー時は盤面をグレーアウトする */

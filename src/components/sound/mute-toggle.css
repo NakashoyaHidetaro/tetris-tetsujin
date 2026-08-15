@@ -1,0 +1,32 @@
+/* 見た目は display-choice (theme-toggle.css) を踏襲してサイドパネルに馴染ませる */
+.mute-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.mute-toggle:hover {
+  border-color: var(--accent-soft);
+}
+
+.mute-toggle:not(.is-muted) {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.22);
+}
+
+.mute-toggle.is-muted {
+  color: var(--muted);
+}
+
+.mute-toggle-label {
+  letter-spacing: 0.04em;
+}

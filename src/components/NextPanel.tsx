@@ -1,13 +1,16 @@
+import { trimShape } from '../game/piece'
 import { tetrominoOf } from '../game/tetrominoes'
 import type { TetrominoType } from '../game/types'
 import './next-panel.css'
 
 /**
- * ミノ 1 個ぶんのプレビュー。shape をそのまま (I なら 4x1、O なら 2x2)
- * 専用グリッドで描く。盤面の 24px グリッド (.board) には依存しない
+ * ミノ 1 個ぶんのプレビュー。SRS 用の形状は 3x3 / 4x4 の余白込みなので、
+ * trimShape で詰めてから (I なら 4x1、O なら 2x2) 専用グリッドで描く。
+ * 盤面の 24px グリッド (.board) には依存しない
  */
-function NextPreview({ type }: { type: TetrominoType }) {
-  const { shape, color } = tetrominoOf(type)
+export function NextPreview({ type }: { type: TetrominoType }) {
+  const { color } = tetrominoOf(type)
+  const shape = trimShape(tetrominoOf(type).shape)
   return (
     <div
       className="next-preview"
@@ -18,6 +21,9 @@ function NextPreview({ type }: { type: TetrominoType }) {
           <div
             key={`${y}-${x}`}
             className={filled ? 'next-cell filled' : 'next-cell'}
+            // color は CSS 変数参照なのでテーマ / パレット切替に追従する (PRD #9)。
+            // data-mino は記号表示 (PRD #17) 用で、CSS 側が中身を描く
+            data-mino={filled ? type : undefined}
             style={filled ? { background: color } : undefined}
           />
         )),

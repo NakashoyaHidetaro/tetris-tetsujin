@@ -1,3 +1,98 @@
+/*
+ * 配色はすべてここの CSS カスタムプロパティに集約する (PRD #9)。
+ * <html data-theme="dark|light" data-palette="classic|cud" data-mino-symbols="on|off">
+ * を src/components/theme.ts が付け替えることで全体の色が切り替わる。
+ * 各 components/*.css は色値を直接書かず、必ずここの変数を参照すること。
+ */
+
+:root,
+:root[data-theme='dark'] {
+  --bg: #0f172a;
+  --fg: #e2e8f0;
+  --muted: #94a3b8;
+  --panel-bg: #1e293b;
+  --panel-border: #475569;
+  --board-bg: #1e293b;
+  --board-border: #475569;
+  --cell-bg: #0f172a;
+  --ghost-border: #94a3b8;
+  --accent: #3b82f6;
+  --accent-soft: #60a5fa;
+  --accent-faint: #93c5fd;
+  --accent-rgb: 59, 130, 246;
+  --accent-soft-rgb: 96, 165, 250;
+  --on-accent: #ffffff;
+  --overlay-bg: rgba(15, 23, 42, 0.92);
+  --overlay-row-bg: rgba(30, 41, 59, 0.8);
+  --pause-veil: rgba(15, 23, 42, 0.18);
+  --pause-panel-bg: rgba(15, 23, 42, 0.82);
+  --record-border: rgba(251, 191, 36, 0.6);
+  --record-bg: linear-gradient(135deg, #78350f, #b45309);
+  --record-fg: #fde68a;
+  --record-icon: #fbbf24;
+  --record-glow-rgb: 251, 191, 36;
+  --shimmer: rgba(255, 255, 255, 0.45);
+  /* ミノ記号 (PRD #17) の描き色。ミノ面の上に載るので明色側に固定 */
+  --mino-symbol: rgba(15, 23, 42, 0.8);
+  --mino-symbol-shadow: rgba(255, 255, 255, 0.55);
+}
+
+:root[data-theme='light'] {
+  --bg: #f1f5f9;
+  --fg: #0f172a;
+  --muted: #475569;
+  --panel-bg: #ffffff;
+  --panel-border: #94a3b8;
+  --board-bg: #cbd5e1;
+  --board-border: #94a3b8;
+  --cell-bg: #e2e8f0;
+  --ghost-border: #475569;
+  --accent: #2563eb;
+  --accent-soft: #3b82f6;
+  --accent-faint: #1d4ed8;
+  --accent-rgb: 37, 99, 235;
+  --accent-soft-rgb: 59, 130, 246;
+  --on-accent: #ffffff;
+  --overlay-bg: rgba(241, 245, 249, 0.94);
+  --overlay-row-bg: rgba(203, 213, 225, 0.8);
+  --pause-veil: rgba(241, 245, 249, 0.18);
+  --pause-panel-bg: rgba(255, 255, 255, 0.88);
+  --record-border: rgba(180, 83, 9, 0.6);
+  --record-bg: linear-gradient(135deg, #fde68a, #fbbf24);
+  --record-fg: #78350f;
+  --record-icon: #b45309;
+  --record-glow-rgb: 217, 119, 6;
+  --shimmer: rgba(255, 255, 255, 0.65);
+  --mino-symbol: rgba(15, 23, 42, 0.85);
+  --mino-symbol-shadow: rgba(255, 255, 255, 0.6);
+}
+
+/* ミノ色: 標準パレット (従来の配色) */
+:root,
+:root[data-palette='classic'] {
+  --mino-i: #06b6d4;
+  --mino-o: #eab308;
+  --mino-t: #a855f7;
+  --mino-s: #22c55e;
+  --mino-z: #ef4444;
+  --mino-j: #3b82f6;
+  --mino-l: #f97316;
+}
+
+/*
+ * 色覚多様性対応パレット (PRD #17)。Okabe-Ito のカラーユニバーサルデザイン
+ * 推奨色から 7 色を割り当て、P/D 型でも隣り合うミノを区別しやすくする
+ */
+:root[data-palette='cud'] {
+  --mino-i: #56b4e9; /* sky blue */
+  --mino-o: #f0e442; /* yellow */
+  --mino-t: #cc79a7; /* reddish purple */
+  --mino-s: #009e73; /* bluish green */
+  --mino-z: #d55e00; /* vermillion */
+  --mino-j: #0072b2; /* blue */
+  --mino-l: #e69f00; /* orange */
+}
+
 * {
   margin: 0;
   box-sizing: border-box;
@@ -5,8 +100,8 @@
 
 body {
   font-family: system-ui, sans-serif;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: var(--bg);
+  color: var(--fg);
 }
 
 .game {
@@ -26,9 +121,70 @@ body {
   gap: 12px;
 }
 
-/* 将来 HOLD (#6) / NEXT (#1) を積むためのパネル列 */
+/* HOLD (#6) + スコア系スタッツ / NEXT (#1) を積むパネル列 */
 .side-panel {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/*
+ * レスポンシブ (PRD #16 モバイル対応)。
+ * 900px 以下: 余白とギャップを詰めて横並びのまま維持する
+ * 700px 以下: 盤面を最上段に置き、サイドパネルはその下で横方向に回り込ませる
+ * 粗いポインタ: 画面下端に固定表示される TouchControls の高さぶん下余白を空ける
+ */
+@media (max-width: 900px) {
+  .game {
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .game-main {
+    gap: 8px;
+  }
+
+  .side-panel {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 700px) {
+  .game-main {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* 盤面を先頭へ。パネル類は盤面の下に回り込ませる */
+  .game-main > .board-wrap {
+    order: -1;
+  }
+
+  .side-panel {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .help {
+    text-align: center;
+  }
+}
+
+@media (pointer: coarse) {
+  .game {
+    /* fixed 配置の .touch-controls に隠れないぶんの下余白 */
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* モバイルブラウザの URL バー伸縮に追随する高さ (対応環境のみ上書き) */
+  @supports (min-height: 100dvh) {
+    .game {
+      min-height: 100dvh;
+    }
+  }
 }
